@@ -1,13 +1,4 @@
-html,
-body,
-div {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  font-size: 100%;
-  font: inherit;
-  vertical-align: baseline;
-}
+@import '@contentful/forma-36-tokens/dist/css/index.css';
 
 .app {
   .body {

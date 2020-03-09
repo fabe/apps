@@ -1,5 +1,6 @@
 import React from 'react';
 import { AppExtensionSDK } from 'contentful-ui-extensions-sdk';
+import {findSelectedContentTypes} from './util';
 
 interface State {
  selectedContentTypes: string[];
@@ -14,10 +15,35 @@ export default class Config extends React.Component<Props, State> {
         selectedContentTypes: [],
     };
 
-    componentDidMount() {
-        const {app} = this.props.sdk;
+    async componentDidMount() {
+        const {app, space, ids} = this.props.sdk;
 
-        app.setReady();
+        const [ctsRes, parameters, eiRes] = await Promise.all([
+            (space.getContentTypes<ContentType>()),
+            (app.getParameters() as Promise<UnsplashParameters | null>),
+            space.getEditorInterfaces()
+        ]);
+
+        const items = ctsRes ? (ctsRes.items as { name: string; sys: { id: string } }[]) : [];
+
+        // eslint-disable-next-line react/no-did-mount-set-state
+        this.setState(
+        {
+            contentTypes: items.map(ct => ({ name: ct.name, id: ct.sys.id })),
+            projectId: parameters ? parameters.projectId : '',
+            selectedContentTypes: findSelectedContentTypes(ids.app, ctsRes.items),
+        },
+        () => sdk.app.setReady()
+        );
+    }
+
+    async onConfigure() {
+        return {
+            parameters: {
+
+            },
+            targetState: {},
+        };
     }
 
     render() {

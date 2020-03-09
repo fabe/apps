@@ -12,6 +12,7 @@
     "@contentful/eslint-config-extension": "0.3.1",
     "@testing-library/react": "8.0.4",
     "@types/jest": "24.0.15",
+    "@types/lodash.get": "^4.4.6",
     "@types/react": "^16.8.17",
     "@types/react-dom": "^16.8.4",
     "@types/webpack-env": "1.13.9",
@@ -38,6 +39,7 @@
     "@contentful/forma-36-react-components": "^3.11.3",
     "@contentful/forma-36-tokens": "^0.3.0",
     "contentful-ui-extensions-sdk": "3.10.12",
+    "lodash.get": "^4.4.2",
     "prop-types": "^15.7.2",
     "react": "^16.8.6",
     "react-dom": "^16.8.6"
