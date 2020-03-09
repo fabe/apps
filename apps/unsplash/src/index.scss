@@ -1,0 +1,96 @@
+html,
+body,
+div {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+
+.app {
+  .body {
+    height: auto;
+    min-height: 65vh;
+    margin: 0 auto;
+    margin-top: var(--spacing-xl);
+    padding: var(--spacing-xl) var(--space-2xl);
+    max-width : 768px;
+    background-color: white;
+    z-index: 2;
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+    border-radius: 2px;
+
+    .config {
+      display: flex;
+      flex-direction: column;
+      width: 90%;
+      padding-top: var(--spacing-l);
+      display: flex;
+      align-items: center;
+      margin: 0 auto;
+
+      p {
+        margin: var(--spacing-m) 0;
+      }
+    }
+  }
+
+  .background {
+    display: block;
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    width: 100%;
+    height: 300px;
+    background-color: #0052cc;
+  }
+
+  .featuresListItem {
+    list-style-type: disc;
+    margin-left: 0px;
+  }
+
+  .light {
+    color: var(--color-text-light);
+    margin-top: var(--spacing-m);
+  }
+
+  .logo {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+  }
+
+  .configuration {
+    width: 100%;
+
+    .section {
+      margin: var(--spacing-xl) 0;
+    }
+
+    .jira-config {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-content: center;
+
+      .selector {
+        width: 49%;
+      }
+    }
+
+    .content-types-config {
+      margin: var(--spacing-xl) 0;
+    }
+
+    .disabled {
+      opacity: 0.2;
+      pointer-events: none;
+    }
+
+  }
+ }

@@ -1,0 +1,8 @@
+{
+  "id": "unsplash",
+  "name": "unsplash",
+  "srcdoc": "./build/index.html",
+  "fieldTypes": [
+    "Object"
+  ]
+}
