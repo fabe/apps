@@ -1,7 +1,7 @@
 import { EditorInterface } from 'contentful-ui-extensions-sdk';
 import get from 'lodash.get';
 
-export function findSelectedContentTypes(appId: string | undefined, editorInterfaces: EditorInterface[]): EditorInterface[] {
+export function findSelectedContentTypes(appId: string | undefined, editorInterfaces: EditorInterface[]): string[] {
     if (!appId) {
         return [];
     }

@@ -1,9 +1,19 @@
 import React from 'react';
-import { AppExtensionSDK } from 'contentful-ui-extensions-sdk';
+import { AppExtensionSDK, CollectionResponse, EditorInterface } from 'contentful-ui-extensions-sdk';
+import {
+  Heading,
+  Paragraph,
+  Typography,
+  FieldGroup,
+  CheckboxField,
+  TextField,
+  TextLink
+} from '@contentful/forma-36-react-components';
 import {findSelectedContentTypes} from './util';
 
 interface State {
- selectedContentTypes: string[];
+    selectedContentTypes: string[];
+    contentTypes: {id: string; name: string}[];
 }
 
 interface Props {
@@ -11,29 +21,32 @@ interface Props {
 }
 
 export default class Config extends React.Component<Props, State> {
-    state = {
-        selectedContentTypes: [],
-    };
+    constructor(props: Props) {
+        super(props);
+
+        this.state = {
+            selectedContentTypes: [],
+            contentTypes: [],
+        };
+    }
 
     async componentDidMount() {
         const {app, space, ids} = this.props.sdk;
 
-        const [ctsRes, parameters, eiRes] = await Promise.all([
-            (space.getContentTypes<ContentType>()),
-            (app.getParameters() as Promise<UnsplashParameters | null>),
+        const [ctsRes, eiRes] = await Promise.all([
+            space.getContentTypes(),
             space.getEditorInterfaces()
         ]);
 
-        const items = ctsRes ? (ctsRes.items as { name: string; sys: { id: string } }[]) : [];
+        const items = ctsRes ? ((ctsRes as CollectionResponse<ContentType>).items as ContentType[]) : [];
 
         // eslint-disable-next-line react/no-did-mount-set-state
         this.setState(
-        {
-            contentTypes: items.map(ct => ({ name: ct.name, id: ct.sys.id })),
-            projectId: parameters ? parameters.projectId : '',
-            selectedContentTypes: findSelectedContentTypes(ids.app, ctsRes.items),
-        },
-        () => sdk.app.setReady()
+            {
+                contentTypes: items.map(ct => ({ name: ct.name, id: ct.sys.id })),
+                selectedContentTypes: findSelectedContentTypes(ids.app, (eiRes as CollectionResponse<EditorInterface>).items),
+            },
+            () => app.setReady()
         );
     }
 
@@ -42,8 +55,22 @@ export default class Config extends React.Component<Props, State> {
             parameters: {
 
             },
-            targetState: {},
+            targetState: {
+                EditorInterface: {
+
+                },
+            },
         };
+    }
+
+    toggleCt = (id: string) => {
+        const {selectedContentTypes} = this.state;
+
+        if (selectedContentTypes.includes(id)) {
+            this.setState(prevState => ({selectedContentTypes: prevState.selectedContentTypes.filter(ctId => ctId !== id)}));
+        } else {
+            this.setState(prevState =>({selectedContentTypes: prevState.selectedContentTypes.concat([id])}));
+        }
     }
 
     render() {
@@ -52,7 +79,20 @@ export default class Config extends React.Component<Props, State> {
                 <div className="background" />
                 <div className="body">
                     <div className="config">
-                        test
+                        <FieldGroup>
+                            {this.state.contentTypes.map(ct => (
+                            <CheckboxField
+                                onChange={() => this.toggleCt(ct.id)}
+                                labelText={ct.name}
+                                name={ct.name}
+                                checked={this.state.selectedContentTypes.includes(ct.id)}
+                                value={ct.id}
+                                id={ct.name}
+                                key={ct.id}
+                                data-test-id={`ct-item-${ct.id}`}
+                            />
+                            ))}
+                        </FieldGroup>
                     </div>
                 </div>
                 <div className="logo">
