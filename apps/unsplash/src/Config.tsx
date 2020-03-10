@@ -4,15 +4,13 @@ import {
   Heading,
   Paragraph,
   Typography,
-  FieldGroup,
-  CheckboxField,
-  TextField,
-  TextLink
+  Select,
+  Option,
 } from '@contentful/forma-36-react-components';
-import {findSelectedContentTypes} from './util';
+import get from 'lodash.get';
 
 interface State {
-    selectedContentTypes: string[];
+    selectedContentType: string;
     contentTypes: {id: string; name: string}[];
 }
 
@@ -25,35 +23,44 @@ export default class Config extends React.Component<Props, State> {
         super(props);
 
         this.state = {
-            selectedContentTypes: [],
+            selectedContentType: '',
             contentTypes: [],
         };
     }
 
     async componentDidMount() {
-        const {app, space, ids} = this.props.sdk;
+        const {app, space} = this.props.sdk;
 
-        const [ctsRes, eiRes] = await Promise.all([
+        const [ctsRes, parameters] = await Promise.all([
             space.getContentTypes<ContentType>(),
-            space.getEditorInterfaces()
+            app.getParameters<UnsplashParameters>(),
         ]);
 
-        const items = ctsRes ? ctsRes.items : [];
+        const formattedContentTypes = (ctsRes ? ctsRes.items : []).map(ct => ({ name: ct.name, id: ct.sys.id }));
 
         // eslint-disable-next-line react/no-did-mount-set-state
         this.setState(
             {
-                contentTypes: items.map(ct => ({ name: ct.name, id: ct.sys.id })),
-                selectedContentTypes: findSelectedContentTypes(ids.app, eiRes.items),
+                contentTypes: formattedContentTypes,
+                selectedContentType: parameters
+                    ? parameters.selectedContentType
+                    : get(formattedContentTypes, [0, 'id'], ''),
             },
             () => app.setReady()
         );
     }
 
-    async onConfigure() {
+    async onConfigure(): Promise<AppConfig> {
+        const {selectedContentType} = this.state;
+
+        if (!selectedContentType) {
+            this.props.sdk.notifier.error('You do not have any content types to select!');
+            return false;
+        }
+
         return {
             parameters: {
-
+                selectedContentType: selectedContentType,
             },
             targetState: {
                 EditorInterface: {
@@ -63,36 +70,40 @@ export default class Config extends React.Component<Props, State> {
         };
     }
 
-    toggleCt = (id: string) => {
-        const {selectedContentTypes} = this.state;
-
-        if (selectedContentTypes.includes(id)) {
-            this.setState(prevState => ({selectedContentTypes: prevState.selectedContentTypes.filter(ctId => ctId !== id)}));
-        } else {
-            this.setState(prevState =>({selectedContentTypes: prevState.selectedContentTypes.concat([id])}));
-        }
+    pickCt = (id: string) => {
+        this.setState({selectedContentType: id});
     }
 
     render() {
+        let body = (
+            <Typography>
+                <Heading>
+                    You do not have any content types!
+                </Heading>
+                <Paragraph>
+                    First create a content type with a JSON field to continue.
+                </Paragraph>
+            </Typography>
+        );
+
+        if (this.state.contentTypes.length) {
+            body = (
+                <Select value={this.state.selectedContentType} onChange={(e) => this.pickCt(e.target.value)}>
+                    {this.state.contentTypes.map(ct => (
+                        <Option key={ct.id} value={ct.id}>
+                            {ct.name}
+                        </Option>
+                    ))}
+                </Select>
+            );
+        }
+
         return (
             <div className="app">
                 <div className="background" />
                 <div className="body">
                     <div className="config">
-                        <FieldGroup>
-                            {this.state.contentTypes.map(ct => (
-                            <CheckboxField
-                                onChange={() => this.toggleCt(ct.id)}
-                                labelText={ct.name}
-                                name={ct.name}
-                                checked={this.state.selectedContentTypes.includes(ct.id)}
-                                value={ct.id}
-                                id={ct.name}
-                                key={ct.id}
-                                data-test-id={`ct-item-${ct.id}`}
-                            />
-                            ))}
-                        </FieldGroup>
+                        {body}
                     </div>
                 </div>
                 <div className="logo">
