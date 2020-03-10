@@ -17,7 +17,11 @@ interface TargetStateConfig {
     parameters: AppParameters;
     targetState: {
         EditorInterface: {
-
+            [key: string]: {
+                controls: {
+                    fieldId: string;
+                }[]
+            }
         };
     };
 }

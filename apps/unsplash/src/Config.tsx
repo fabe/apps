@@ -55,7 +55,7 @@ export default class Config extends React.Component<Props, State> {
                 contentTypes: formattedContentTypes,
                 selectedContentTypeId: parameters
                     ? parameters.selectedContentTypeId
-                    : get(formattedContentTypes, [0, 'id'], ''),
+                    : get(formattedContentTypes, [0, 'sys', 'id'], ''),
             },
             () => app.setReady()
         );
@@ -73,7 +73,7 @@ export default class Config extends React.Component<Props, State> {
 
         return {
             parameters: {
-                selectedContentTypeId: selectedContentTypeId,
+                selectedContentTypeId,
             },
             targetState: {
                 EditorInterface: createEditorInterface(selectedContentType),
