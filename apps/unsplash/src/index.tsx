@@ -1,6 +1,12 @@
 import * as React from 'react';
 import { render } from 'react-dom';
-import { init, FieldExtensionSDK, AppExtensionSDK, locations } from 'contentful-ui-extensions-sdk';
+import {
+  init,
+  FieldExtensionSDK,
+  AppExtensionSDK,
+  locations,
+  DialogExtensionSDK
+} from 'contentful-ui-extensions-sdk';
 import Config from './Config';
 import FieldEditor from './FieldEditor';
 import Dialog from './Dialog';
@@ -17,7 +23,7 @@ init(sdk => {
   } else if (sdk.location.is(locations.LOCATION_ENTRY_FIELD)) {
     renderAtRoot(<FieldEditor sdk={sdk as FieldExtensionSDK} />);
   } else if (sdk.location.is(locations.LOCATION_DIALOG)) {
-    renderAtRoot(<Dialog sdk={sdk as FieldExtensionSDK} />);
+    renderAtRoot(<Dialog sdk={sdk as DialogExtensionSDK} />);
   }
 });
 

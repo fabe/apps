@@ -1,7 +1,6 @@
 import React from 'react';
-import { TextInput, Button } from '@contentful/forma-36-react-components';
+import { Button } from '@contentful/forma-36-react-components';
 import { FieldExtensionSDK } from 'contentful-ui-extensions-sdk';
-import debounce from 'lodash.debounce';
 import Client from './client';
 
 interface Props {
@@ -45,7 +44,9 @@ export default class FieldEditor extends React.Component<Props, State> {
   };
 
   openSearch = async () => {
-    const selectedPhoto: UnsplashResult | null = await this.props.sdk.dialogs.openCurrentApp();
+    const selectedPhoto: UnsplashResult | null = await this.props.sdk.dialogs.openCurrentApp({
+      title: 'foo'
+    });
 
     if (selectedPhoto) {
       this.props.sdk.field.setValue(selectedPhoto);
@@ -57,8 +58,8 @@ export default class FieldEditor extends React.Component<Props, State> {
 
     return (
       <div>
+        <div>{!!value && <img src={value.urls.thumb} alt={value.alt_description} />}</div>
         <Button onClick={this.openSearch}>Open Search</Button>
-        {!!value && <img src={value.urls.thumb} alt={value.alt_description} />}
       </div>
     );
   }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { TextInput, Button } from '@contentful/forma-36-react-components';
+import { TextInput, Button, Icon } from '@contentful/forma-36-react-components';
 import { DialogExtensionSDK } from 'contentful-ui-extensions-sdk';
 import debounce from 'lodash.debounce';
 import Client from './client';
@@ -56,27 +56,34 @@ export default class Dialog extends React.Component<Props, State> {
   };
 
   render() {
-    const { photos, error, selectedPhoto } = this.state;
+    const { photos, selectedPhoto } = this.state;
 
     return (
       <div>
-        <TextInput
-          width="large"
-          type="text"
-          id="my-field"
-          testId="my-field"
-          placeholder="Search for a photo"
-          autoComplete="off"
-          value={this.state.searchValue}
-          onChange={e => this.onSearch(e.target.value)}
-        />
-        <Button onClick={this.save}>Save</Button>
-        {!!photos.length &&
-          photos.map(photo => (
-            <div key={photo.id} onClick={() => this.togglePhoto(photo)}>
-              <img src={photo.urls.thumb} />
-            </div>
-          ))}
+        <div>
+          <TextInput
+            width="large"
+            type="text"
+            id="my-field"
+            testId="my-field"
+            placeholder="Search for a photo"
+            autoComplete="off"
+            value={this.state.searchValue}
+            onChange={e => this.onSearch(e.target.value)}
+          />
+          <Button onClick={this.save}>Save</Button>
+        </div>
+        <div>
+          {!!photos.length &&
+            photos.map(photo => (
+              <div key={photo.id} onClick={() => this.togglePhoto(photo)}>
+                {!!selectedPhoto && selectedPhoto.id === photo.id && (
+                  <Icon icon="CheckCircle" color="positive" />
+                )}
+                <img src={photo.urls.thumb} />
+              </div>
+            ))}
+        </div>
       </div>
     );
   }
