@@ -34,17 +34,17 @@ export default class Config extends React.Component<Props, State> {
         const {app, space, ids} = this.props.sdk;
 
         const [ctsRes, eiRes] = await Promise.all([
-            space.getContentTypes(),
+            space.getContentTypes<ContentType>(),
             space.getEditorInterfaces()
         ]);
 
-        const items = ctsRes ? ((ctsRes as CollectionResponse<ContentType>).items as ContentType[]) : [];
+        const items = ctsRes ? ctsRes.items : [];
 
         // eslint-disable-next-line react/no-did-mount-set-state
         this.setState(
             {
                 contentTypes: items.map(ct => ({ name: ct.name, id: ct.sys.id })),
-                selectedContentTypes: findSelectedContentTypes(ids.app, (eiRes as CollectionResponse<EditorInterface>).items),
+                selectedContentTypes: findSelectedContentTypes(ids.app, eiRes.items),
             },
             () => app.setReady()
         );
