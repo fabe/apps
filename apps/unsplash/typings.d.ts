@@ -1,17 +1,20 @@
-interface UnsplashParameters {
-    selectedContentType: string;
-}
-
-
 interface ContentType {
     name: string;
+    fields: {
+        id: string;
+        type: 'Object';
+    }[];
     sys: {
         id: string;
     };
 }
 
+interface AppParameters {
+    selectedContentTypeId: string;
+}
+
 interface TargetStateConfig {
-    parameters: UnsplashParameters;
+    parameters: AppParameters;
     targetState: {
         EditorInterface: {
 

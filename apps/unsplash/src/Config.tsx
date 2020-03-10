@@ -10,12 +10,22 @@ import {
 import get from 'lodash.get';
 
 interface State {
-    selectedContentType: string;
-    contentTypes: {id: string; name: string}[];
+    selectedContentTypeId: string;
+    contentTypes: ContentType[];
 }
 
 interface Props {
     sdk: AppExtensionSDK;
+}
+
+function createEditorInterface(selectedCt: ContentType,) {
+    const targetField = selectedCt.fields.find(field => field.type === 'Object');
+
+    if (!targetField) {
+        return {};
+    }
+
+    return {[selectedCt.sys.id]: {controls: [{fieldId: targetField.id}]}};
 }
 
 export default class Config extends React.Component<Props, State> {
@@ -23,35 +33,38 @@ export default class Config extends React.Component<Props, State> {
         super(props);
 
         this.state = {
-            selectedContentType: '',
+            selectedContentTypeId: '',
             contentTypes: [],
         };
     }
 
     async componentDidMount() {
         const {app, space} = this.props.sdk;
+        app.onConfigure(this.onConfigure);
 
         const [ctsRes, parameters] = await Promise.all([
             space.getContentTypes<ContentType>(),
-            app.getParameters<UnsplashParameters>(),
+            app.getParameters<AppParameters>(),
         ]);
 
-        const formattedContentTypes = (ctsRes ? ctsRes.items : []).map(ct => ({ name: ct.name, id: ct.sys.id }));
+        const formattedContentTypes = ctsRes ? ctsRes.items : [];
 
         // eslint-disable-next-line react/no-did-mount-set-state
         this.setState(
             {
                 contentTypes: formattedContentTypes,
-                selectedContentType: parameters
-                    ? parameters.selectedContentType
+                selectedContentTypeId: parameters
+                    ? parameters.selectedContentTypeId
                     : get(formattedContentTypes, [0, 'id'], ''),
             },
             () => app.setReady()
         );
     }
 
-    async onConfigure(): Promise<AppConfig> {
-        const {selectedContentType} = this.state;
+    onConfigure = async (): Promise<AppConfig> => {
+        const {selectedContentTypeId, contentTypes} = this.state;
+
+        const selectedContentType = contentTypes.find(ct => ct.sys.id === selectedContentTypeId);
 
         if (!selectedContentType) {
             this.props.sdk.notifier.error('You do not have any content types to select!');
@@ -60,18 +73,16 @@ export default class Config extends React.Component<Props, State> {
 
         return {
             parameters: {
-                selectedContentType: selectedContentType,
+                selectedContentTypeId: selectedContentTypeId,
             },
             targetState: {
-                EditorInterface: {
-
-                },
+                EditorInterface: createEditorInterface(selectedContentType),
             },
         };
     }
 
     pickCt = (id: string) => {
-        this.setState({selectedContentType: id});
+        this.setState({selectedContentTypeId: id});
     }
 
     render() {
@@ -88,9 +99,9 @@ export default class Config extends React.Component<Props, State> {
 
         if (this.state.contentTypes.length) {
             body = (
-                <Select value={this.state.selectedContentType} onChange={(e) => this.pickCt(e.target.value)}>
+                <Select value={this.state.selectedContentTypeId} onChange={(e) => this.pickCt(e.target.value)}>
                     {this.state.contentTypes.map(ct => (
-                        <Option key={ct.id} value={ct.id}>
+                        <Option key={ct.sys.id} value={ct.sys.id}>
                             {ct.name}
                         </Option>
                     ))}
