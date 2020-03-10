@@ -1,19 +1,19 @@
 import React from 'react';
-import { TextInput } from '@contentful/forma-36-react-components';
+import { TextInput, Button } from '@contentful/forma-36-react-components';
 import { FieldExtensionSDK } from 'contentful-ui-extensions-sdk';
 import debounce from 'lodash.debounce';
 import Client from './client';
 
 interface Props {
-    sdk: FieldExtensionSDK;
+  sdk: FieldExtensionSDK;
 }
 
 interface State {
-    searchValue: string;
-    value: object | null;
-    client: Client;
-    error: boolean;
-    photos: UnsplashResult[];
+  searchValue: string;
+  value: object | null;
+  client: Client;
+  error: boolean;
+  photos: UnsplashResult[];
 }
 
 export default class FieldEditor extends React.Component<Props, State> {
@@ -25,7 +25,7 @@ export default class FieldEditor extends React.Component<Props, State> {
       value: props.sdk.field.getValue() || null,
       client: new Client(process.env.UNSPLASH_TOKEN),
       error: false,
-      photos: [],
+      photos: []
     };
   }
 
@@ -48,35 +48,17 @@ export default class FieldEditor extends React.Component<Props, State> {
     this.setState({ value });
   };
 
-  onSearch = debounce(async (value: string) => {
-      if (!value) {
-          return;
-      }
+  openSearch = async () => {
+    const close = await this.props.sdk.dialogs.openCurrentApp();
+  };
 
-      const res = await this.state.client.search(value);
-
-      this.setState({
-          error: res.error,
-          photos: res.photos,
-      });
-  }, 1000);
-
-  render = () => {
-    const {photos, error} = this.state;
+  render() {
+    const { photos, error } = this.state;
 
     return (
-        <div>
-            <TextInput
-                width="large"
-                type="text"
-                id="my-field"
-                testId="my-field"
-                placeholder="Search for a photo"
-                value={this.state.searchValue}
-                onChange={(e) => this.onSearch(e.target.value)}
-            />
-            {this.s}
-        </div>
+      <div>
+        <Button onClick={this.openSearch}>Open Search</Button>
+      </div>
     );
-  };
+  }
 }

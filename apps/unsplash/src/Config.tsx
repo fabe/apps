@@ -5,121 +5,116 @@ import {
   Paragraph,
   Typography,
   Select,
-  Option,
+  Option
 } from '@contentful/forma-36-react-components';
 import get from 'lodash.get';
 
 interface State {
-    selectedContentTypeId: string;
-    contentTypes: ContentType[];
+  selectedContentTypeId: string;
+  contentTypes: ContentType[];
 }
 
 interface Props {
-    sdk: AppExtensionSDK;
+  sdk: AppExtensionSDK;
 }
 
-function createEditorInterface(selectedCt: ContentType,) {
-    const targetField = selectedCt.fields.find(field => field.type === 'Object');
+function createEditorInterface(selectedCt: ContentType) {
+  const targetField = selectedCt.fields.find(field => field.type === 'Object');
 
-    if (!targetField) {
-        return {};
-    }
+  if (!targetField) {
+    return {};
+  }
 
-    return {[selectedCt.sys.id]: {controls: [{fieldId: targetField.id}]}};
+  return { [selectedCt.sys.id]: { controls: [{ fieldId: targetField.id }] } };
 }
 
 export default class Config extends React.Component<Props, State> {
-    constructor(props: Props) {
-        super(props);
+  constructor(props: Props) {
+    super(props);
 
-        this.state = {
-            selectedContentTypeId: '',
-            contentTypes: [],
-        };
+    this.state = {
+      selectedContentTypeId: '',
+      contentTypes: []
+    };
+  }
+
+  async componentDidMount() {
+    const { app, space } = this.props.sdk;
+    app.onConfigure(this.onConfigure);
+
+    const [ctsRes, parameters] = await Promise.all([
+      space.getContentTypes<ContentType>(),
+      app.getParameters<AppParameters>()
+    ]);
+
+    const formattedContentTypes = ctsRes ? ctsRes.items : [];
+
+    // eslint-disable-next-line react/no-did-mount-set-state
+    this.setState(
+      {
+        contentTypes: formattedContentTypes,
+        selectedContentTypeId: parameters
+          ? parameters.selectedContentTypeId
+          : get(formattedContentTypes, [0, 'sys', 'id'], '')
+      },
+      () => app.setReady()
+    );
+  }
+
+  onConfigure = async (): Promise<AppConfig> => {
+    const { selectedContentTypeId, contentTypes } = this.state;
+
+    const selectedContentType = contentTypes.find(ct => ct.sys.id === selectedContentTypeId);
+
+    if (!selectedContentType) {
+      this.props.sdk.notifier.error('You do not have any content types to select!');
+      return false;
     }
 
-    async componentDidMount() {
-        const {app, space} = this.props.sdk;
-        app.onConfigure(this.onConfigure);
+    return {
+      parameters: {
+        selectedContentTypeId
+      },
+      targetState: {
+        EditorInterface: createEditorInterface(selectedContentType)
+      }
+    };
+  };
 
-        const [ctsRes, parameters] = await Promise.all([
-            space.getContentTypes<ContentType>(),
-            app.getParameters<AppParameters>(),
-        ]);
+  pickCt = (id: string) => {
+    this.setState({ selectedContentTypeId: id });
+  };
 
-        const formattedContentTypes = ctsRes ? ctsRes.items : [];
+  render() {
+    let body = (
+      <Typography>
+        <Heading>You do not have any content types!</Heading>
+        <Paragraph>First create a content type with a JSON field to continue.</Paragraph>
+      </Typography>
+    );
 
-        // eslint-disable-next-line react/no-did-mount-set-state
-        this.setState(
-            {
-                contentTypes: formattedContentTypes,
-                selectedContentTypeId: parameters
-                    ? parameters.selectedContentTypeId
-                    : get(formattedContentTypes, [0, 'sys', 'id'], ''),
-            },
-            () => app.setReady()
-        );
+    if (this.state.contentTypes.length) {
+      body = (
+        <Select
+          value={this.state.selectedContentTypeId}
+          onChange={e => this.pickCt(e.target.value)}>
+          {this.state.contentTypes.map(ct => (
+            <Option key={ct.sys.id} value={ct.sys.id}>
+              {ct.name}
+            </Option>
+          ))}
+        </Select>
+      );
     }
 
-    onConfigure = async (): Promise<AppConfig> => {
-        const {selectedContentTypeId, contentTypes} = this.state;
-
-        const selectedContentType = contentTypes.find(ct => ct.sys.id === selectedContentTypeId);
-
-        if (!selectedContentType) {
-            this.props.sdk.notifier.error('You do not have any content types to select!');
-            return false;
-        }
-
-        return {
-            parameters: {
-                selectedContentTypeId,
-            },
-            targetState: {
-                EditorInterface: createEditorInterface(selectedContentType),
-            },
-        };
-    }
-
-    pickCt = (id: string) => {
-        this.setState({selectedContentTypeId: id});
-    }
-
-    render() {
-        let body = (
-            <Typography>
-                <Heading>
-                    You do not have any content types!
-                </Heading>
-                <Paragraph>
-                    First create a content type with a JSON field to continue.
-                </Paragraph>
-            </Typography>
-        );
-
-        if (this.state.contentTypes.length) {
-            body = (
-                <Select value={this.state.selectedContentTypeId} onChange={(e) => this.pickCt(e.target.value)}>
-                    {this.state.contentTypes.map(ct => (
-                        <Option key={ct.sys.id} value={ct.sys.id}>
-                            {ct.name}
-                        </Option>
-                    ))}
-                </Select>
-            );
-        }
-
-        return (
-            <div className="app">
-                <div className="background" />
-                <div className="body">
-                    <div className="config">
-                        {body}
-                    </div>
-                </div>
-                <div className="logo">
-                </div>
-            </div>
-        );
-    }
+    return (
+      <div className="app">
+        <div className="background" />
+        <div className="body">
+          <div className="config">{body}</div>
+        </div>
+        <div className="logo"></div>
+      </div>
+    );
+  }
 }

@@ -1,38 +1,37 @@
-
 export default class Client {
-    private UNSPLASH_HOST = 'https://api.unsplash.com';
-    token: string;
+  private UNSPLASH_HOST = 'https://api.unsplash.com';
+  token: string;
 
-    constructor(token: string) {
-        if (!token) {
-            throw new Error('You must provide an Unsplash token!');
-        }
-
-        this.token = token;
+  constructor(token: string) {
+    if (!token) {
+      throw new Error('You must provide an Unsplash token!');
     }
 
-    public async search(value: string): Promise<SearchResponse> {
-        const res = await fetch(
-            `${this.UNSPLASH_HOST}/search/photos?page=1&query=${encodeURIComponent(value)}`,
-            {
-                headers: {
-                    Authorization: `Client-ID ${this.token}`,
-                }
-            }
-        );
+    this.token = token;
+  }
 
-        if (res.ok) {
-            const data: UnsplashResponse = await res.json();
-
-            return {
-                error: false,
-                photos: data.results,
-            };
+  public async search(value: string): Promise<SearchResponse> {
+    const res = await fetch(
+      `${this.UNSPLASH_HOST}/search/photos?page=1&query=${encodeURIComponent(value)}`,
+      {
+        headers: {
+          Authorization: `Client-ID ${this.token}`
         }
+      }
+    );
 
-        return {
-            error: true,
-            photos: [],
-        };
+    if (res.ok) {
+      const data: UnsplashResponse = await res.json();
+
+      return {
+        error: false,
+        photos: data.results
+      };
     }
+
+    return {
+      error: true,
+      photos: []
+    };
+  }
 }
