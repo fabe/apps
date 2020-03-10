@@ -10,10 +10,8 @@ interface Props {
 
 interface State {
   searchValue: string;
-  value: object | null;
+  value: UnsplashResult | null;
   client: Client;
-  error: boolean;
-  photos: UnsplashResult[];
 }
 
 export default class FieldEditor extends React.Component<Props, State> {
@@ -23,9 +21,7 @@ export default class FieldEditor extends React.Component<Props, State> {
     this.state = {
       searchValue: '',
       value: props.sdk.field.getValue() || null,
-      client: new Client(process.env.UNSPLASH_TOKEN),
-      error: false,
-      photos: []
+      client: new Client(process.env.UNSPLASH_TOKEN)
     };
   }
 
@@ -44,20 +40,25 @@ export default class FieldEditor extends React.Component<Props, State> {
     }
   }
 
-  onExternalChange = (value: object | null) => {
+  onExternalChange = (value: UnsplashResult | null) => {
     this.setState({ value });
   };
 
   openSearch = async () => {
-    const close = await this.props.sdk.dialogs.openCurrentApp();
+    const selectedPhoto: UnsplashResult | null = await this.props.sdk.dialogs.openCurrentApp();
+
+    if (selectedPhoto) {
+      this.props.sdk.field.setValue(selectedPhoto);
+    }
   };
 
   render() {
-    const { photos, error } = this.state;
+    const { value } = this.state;
 
     return (
       <div>
         <Button onClick={this.openSearch}>Open Search</Button>
+        {!!value && <img src={value.urls.thumb} alt={value.alt_description} />}
       </div>
     );
   }

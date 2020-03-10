@@ -13,7 +13,7 @@ interface State {
   client: Client;
   error: boolean;
   photos: UnsplashResult[];
-  selectedPhotos: UnsplashResult[];
+  selectedPhoto: UnsplashResult | null;
 }
 
 export default class Dialog extends React.Component<Props, State> {
@@ -25,7 +25,7 @@ export default class Dialog extends React.Component<Props, State> {
       client: new Client(process.env.UNSPLASH_TOKEN),
       error: false,
       photos: [],
-      selectedPhotos: []
+      selectedPhoto: null
     };
   }
 
@@ -48,17 +48,15 @@ export default class Dialog extends React.Component<Props, State> {
   }, 300);
 
   togglePhoto = (photo: UnsplashResult) => {
-    const { selectedPhotos } = this.state;
+    this.setState({ selectedPhoto: photo });
+  };
 
-    if (selectedPhotos.find(s => s.id === photo.id)) {
-      this.setState({ selectedPhotos: selectedPhotos.filter(s => s.id !== photo.id) });
-    } else {
-      this.setState({ selectedPhotos: selectedPhotos.concat([photo]) });
-    }
+  save = () => {
+    this.props.sdk.close(this.state.selectedPhoto);
   };
 
   render() {
-    const { photos, error, selectedPhotos } = this.state;
+    const { photos, error, selectedPhoto } = this.state;
 
     return (
       <div>
@@ -72,12 +70,10 @@ export default class Dialog extends React.Component<Props, State> {
           value={this.state.searchValue}
           onChange={e => this.onSearch(e.target.value)}
         />
+        <Button onClick={this.save}>Save</Button>
         {!!photos.length &&
           photos.map(photo => (
-            <div
-              style={{ border: selectedPhotos.find(p => p.id === photo.id) ? `1px solid red` : '' }}
-              key={photo.id}
-              onClick={() => this.togglePhoto(photo)}>
+            <div key={photo.id} onClick={() => this.togglePhoto(photo)}>
               <img src={photo.urls.thumb} />
             </div>
           ))}
