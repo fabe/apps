@@ -85,3 +85,23 @@
 
   }
  }
+
+ .search-collection {
+   display: flex;
+   justify-content: space-between;
+   align-content: stretch;
+   align-items: stretch;
+   flex-wrap: wrap;
+   margin-top: 4px;
+
+   .photo {
+      position: relative;
+      cursor: pointer;
+      margin: 0 4px 8px ;
+      flex-grow: 1;
+
+      img {
+        width: 100%;
+      }
+   }
+ }

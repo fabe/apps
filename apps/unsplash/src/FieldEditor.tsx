@@ -45,7 +45,9 @@ export default class FieldEditor extends React.Component<Props, State> {
 
   openSearch = async () => {
     const selectedPhoto: UnsplashResult | null = await this.props.sdk.dialogs.openCurrentApp({
-      title: 'foo'
+      title: 'Select a photo',
+      minHeight: 768,
+      width: 'large'
     });
 
     if (selectedPhoto) {

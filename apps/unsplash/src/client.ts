@@ -12,7 +12,7 @@ export default class Client {
 
   public async search(value: string): Promise<SearchResponse> {
     const res = await fetch(
-      `${this.UNSPLASH_HOST}/search/photos?page=1&query=${encodeURIComponent(value)}`,
+      `${this.UNSPLASH_HOST}/search/photos?page=1&query=${encodeURIComponent(value)}&orientation=landscape`,
       {
         headers: {
           Authorization: `Client-ID ${this.token}`

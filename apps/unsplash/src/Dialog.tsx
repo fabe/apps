@@ -1,5 +1,5 @@
 import React from 'react';
-import { TextInput, Button, Icon } from '@contentful/forma-36-react-components';
+import { TextInput, Button, Asset } from '@contentful/forma-36-react-components';
 import { DialogExtensionSDK } from 'contentful-ui-extensions-sdk';
 import debounce from 'lodash.debounce';
 import Client from './client';
@@ -13,7 +13,10 @@ interface State {
   client: Client;
   error: boolean;
   photos: UnsplashResult[];
-  selectedPhoto: UnsplashResult | null;
+}
+
+function formatPhotoThumb(url: string) {
+    return url.replace('fit=max', 'fit=fillmax').concat('&w=300&h=300');
 }
 
 export default class Dialog extends React.Component<Props, State> {
@@ -25,7 +28,6 @@ export default class Dialog extends React.Component<Props, State> {
       client: new Client(process.env.UNSPLASH_TOKEN),
       error: false,
       photos: [],
-      selectedPhoto: null
     };
   }
 
@@ -47,22 +49,18 @@ export default class Dialog extends React.Component<Props, State> {
     });
   }, 300);
 
-  togglePhoto = (photo: UnsplashResult) => {
-    this.setState({ selectedPhoto: photo });
-  };
-
-  save = () => {
-    this.props.sdk.close(this.state.selectedPhoto);
+  save = (photo: UnsplashResult) => {
+    this.props.sdk.close(photo);
   };
 
   render() {
-    const { photos, selectedPhoto } = this.state;
+    const { photos } = this.state;
 
     return (
       <div>
         <div>
           <TextInput
-            width="large"
+            width="full"
             type="text"
             id="my-field"
             testId="my-field"
@@ -71,18 +69,13 @@ export default class Dialog extends React.Component<Props, State> {
             value={this.state.searchValue}
             onChange={e => this.onSearch(e.target.value)}
           />
-          <Button onClick={this.save}>Save</Button>
         </div>
-        <div>
-          {!!photos.length &&
-            photos.map(photo => (
-              <div key={photo.id} onClick={() => this.togglePhoto(photo)}>
-                {!!selectedPhoto && selectedPhoto.id === photo.id && (
-                  <Icon icon="CheckCircle" color="positive" />
-                )}
-                <img src={photo.urls.thumb} />
-              </div>
-            ))}
+        <div className="search-collection">
+          {photos.map(photo => (
+            <div key={photo.id} onClick={() => this.save(photo)} className="photo">
+                <Asset src={formatPhotoThumb(photo.urls.thumb)} type="image" title={photo.alt_description} />
+            </div>
+        ))}
         </div>
       </div>
     );
