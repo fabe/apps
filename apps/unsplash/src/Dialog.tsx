@@ -25,7 +25,7 @@ export default class Dialog extends React.Component<Props, State> {
 
     this.state = {
       searchValue: '',
-      client: new Client(process.env.UNSPLASH_TOKEN),
+      client: new Client(process.env.UNSPLASH_TOKEN || ''),
       error: false,
       photos: [],
     };

@@ -111,7 +111,17 @@ export default class Config extends React.Component<Props, State> {
       <div className="app">
         <div className="background" />
         <div className="body">
-          <div className="config">{body}</div>
+          <div className="config">
+            <Typography>
+              <Heading>
+                Unsplash
+              </Heading>
+              <Paragraph>
+                This is the Unsplash demo app. Pick a content type with a <code>JSON</code> field.
+              </Paragraph>
+            </Typography>
+            {body}
+          </div>
         </div>
         <div className="logo"></div>
       </div>
